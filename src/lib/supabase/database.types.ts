@@ -135,6 +135,93 @@ export type Database = {
           },
         ]
       }
+      delivery_lines: {
+        Row: {
+          delivery_id: string
+          id: string
+          product_id: string
+          qty: number
+        }
+        Insert: {
+          delivery_id: string
+          id?: string
+          product_id: string
+          qty: number
+        }
+        Update: {
+          delivery_id?: string
+          id?: string
+          product_id?: string
+          qty?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_lines_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deliveries: {
+        Row: {
+          created_at: string
+          id: string
+          partner_id: string | null
+          reference: string
+          responsible_id: string | null
+          scheduled_date: string
+          source_location_id: string
+          status: string
+          validated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          partner_id?: string | null
+          reference?: string
+          responsible_id?: string | null
+          scheduled_date?: string
+          source_location_id: string
+          status?: string
+          validated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          partner_id?: string | null
+          reference?: string
+          responsible_id?: string | null
+          scheduled_date?: string
+          source_location_id?: string
+          status?: string
+          validated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_source_location_id_fkey"
+            columns: ["source_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       receipt_lines: {
         Row: {
           id: string
@@ -391,6 +478,20 @@ export type Database = {
           reference_type: string | null
           related_location_id: string | null
           unit_cost_snapshot: number | null
+        }
+      }
+      validate_delivery: {
+        Args: { p_delivery_id: string; p_user_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          partner_id: string | null
+          reference: string
+          responsible_id: string | null
+          scheduled_date: string
+          source_location_id: string
+          status: string
+          validated_at: string | null
         }
       }
       validate_receipt: {
