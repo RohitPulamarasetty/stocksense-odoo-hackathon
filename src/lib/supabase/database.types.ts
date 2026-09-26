@@ -135,6 +135,96 @@ export type Database = {
           },
         ]
       }
+      receipt_lines: {
+        Row: {
+          id: string
+          product_id: string
+          qty: number
+          receipt_id: string
+          unit_cost: number
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          qty: number
+          receipt_id: string
+          unit_cost?: number
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          qty?: number
+          receipt_id?: string
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_lines_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receipts: {
+        Row: {
+          created_at: string
+          destination_location_id: string
+          id: string
+          partner_id: string | null
+          reference: string
+          responsible_id: string | null
+          scheduled_date: string
+          status: string
+          validated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          destination_location_id: string
+          id?: string
+          partner_id?: string | null
+          reference?: string
+          responsible_id?: string | null
+          scheduled_date?: string
+          status?: string
+          validated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          destination_location_id?: string
+          id?: string
+          partner_id?: string | null
+          reference?: string
+          responsible_id?: string | null
+          scheduled_date?: string
+          status?: string
+          validated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_destination_location_id_fkey"
+            columns: ["destination_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_balances: {
         Row: {
           location_id: string
@@ -301,6 +391,20 @@ export type Database = {
           reference_type: string | null
           related_location_id: string | null
           unit_cost_snapshot: number | null
+        }
+      }
+      validate_receipt: {
+        Args: { p_receipt_id: string; p_user_id: string }
+        Returns: {
+          created_at: string
+          destination_location_id: string
+          id: string
+          partner_id: string | null
+          reference: string
+          responsible_id: string | null
+          scheduled_date: string
+          status: string
+          validated_at: string | null
         }
       }
     }
