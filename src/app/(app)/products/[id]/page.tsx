@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { StockHealthBadge } from "@/components/inventory/status-badge";
 import { movementTypeLabel } from "@/lib/inventory/status";
+import { computeStockHealth, daysSince } from "@/lib/inventory/health";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -31,8 +33,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const totalOnHand = (balances ?? []).reduce((sum, b) => sum + b.on_hand, 0);
   const inventoryValue = totalOnHand * product.unit_cost;
-  const stockHealth =
-    totalOnHand <= 0 ? "out" : totalOnHand < product.reorder_level ? "low" : "healthy";
+  const lastMovementAt = ledger?.[0]?.created_at ?? null;
+  const movementAge = daysSince(lastMovementAt);
+  const stockHealth = computeStockHealth({
+    onHand: totalOnHand,
+    reorderLevel: product.reorder_level,
+    daysSinceLastMovement: movementAge,
+  });
 
   return (
     <div className="space-y-6">
@@ -63,8 +70,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <p className="text-2xl font-semibold">
                 {totalOnHand} <span className="text-sm font-normal text-muted-foreground">{product.uom}</span>
               </p>
-              <Badge variant={stockHealth}>{stockHealth === "out" ? "Out of Stock" : stockHealth === "low" ? "Low Stock" : "Healthy"}</Badge>
+              <StockHealthBadge health={stockHealth} />
             </div>
+            {movementAge !== null && (
+              <p className="mt-1 text-xs text-muted-foreground">Last movement {movementAge} day{movementAge === 1 ? "" : "s"} ago</p>
+            )}
           </CardContent>
         </Card>
         <Card>

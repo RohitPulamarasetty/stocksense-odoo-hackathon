@@ -7,6 +7,8 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { StockHealthBadge } from "@/components/inventory/status-badge";
+import { computeStockHealth, daysSince } from "@/lib/inventory/health";
 
 export default async function ProductsPage({
   searchParams,
@@ -16,7 +18,7 @@ export default async function ProductsPage({
   const { q, category } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: categories }, productsQuery, { data: balances }] = await Promise.all([
+  const [{ data: categories }, productsQuery, { data: balances }, { data: ledger }] = await Promise.all([
     supabase.from("categories").select("id, name").order("name"),
     (async () => {
       let query = supabase
@@ -34,12 +36,19 @@ export default async function ProductsPage({
       return query;
     })(),
     supabase.from("stock_balances").select("product_id, on_hand"),
+    supabase.from("stock_ledger").select("product_id, created_at").order("created_at", { ascending: false }),
   ]);
 
   const products = productsQuery.data ?? [];
   const stockByProduct = new Map<string, number>();
   for (const b of balances ?? []) {
     stockByProduct.set(b.product_id, (stockByProduct.get(b.product_id) ?? 0) + b.on_hand);
+  }
+  const lastMovementByProduct = new Map<string, string>();
+  for (const l of ledger ?? []) {
+    if (!lastMovementByProduct.has(l.product_id)) {
+      lastMovementByProduct.set(l.product_id, l.created_at);
+    }
   }
 
   return (
@@ -106,6 +115,7 @@ export default async function ProductsPage({
               <TableHead>Category</TableHead>
               <TableHead>UoM</TableHead>
               <TableHead className="text-right">Current Stock</TableHead>
+              <TableHead>Health</TableHead>
               <TableHead className="text-right">Unit Cost</TableHead>
               <TableHead className="text-right">Reorder Level</TableHead>
               <TableHead>Status</TableHead>
@@ -126,16 +136,15 @@ export default async function ProductsPage({
                 </TableCell>
                 <TableCell className="text-muted-foreground">{product.categories?.name ?? "—"}</TableCell>
                 <TableCell className="text-muted-foreground">{product.uom}</TableCell>
-                <TableCell className="text-right">
-                  {(() => {
-                    const stock = stockByProduct.get(product.id) ?? 0;
-                    const health = stock <= 0 ? "out" : stock < product.reorder_level ? "low" : "healthy";
-                    return (
-                      <span className={health === "healthy" ? "" : health === "low" ? "text-health-low" : "text-health-out"}>
-                        {stock}
-                      </span>
-                    );
-                  })()}
+                <TableCell className="text-right">{stockByProduct.get(product.id) ?? 0}</TableCell>
+                <TableCell>
+                  <StockHealthBadge
+                    health={computeStockHealth({
+                      onHand: stockByProduct.get(product.id) ?? 0,
+                      reorderLevel: product.reorder_level,
+                      daysSinceLastMovement: daysSince(lastMovementByProduct.get(product.id) ?? null),
+                    })}
+                  />
                 </TableCell>
                 <TableCell className="text-right">₹{product.unit_cost.toFixed(2)}</TableCell>
                 <TableCell className="text-right">{product.reorder_level}</TableCell>
