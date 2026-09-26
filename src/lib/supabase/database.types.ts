@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      adjustment_lines: {
+        Row: {
+          adjustment_id: string
+          counted_qty: number
+          id: string
+          product_id: string
+        }
+        Insert: {
+          adjustment_id: string
+          counted_qty: number
+          id?: string
+          product_id: string
+        }
+        Update: {
+          adjustment_id?: string
+          counted_qty?: number
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adjustment_lines_adjustment_id_fkey"
+            columns: ["adjustment_id"]
+            isOneToOne: false
+            referencedRelation: "adjustments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adjustment_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      adjustments: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string
+          reason: string | null
+          reference: string
+          responsible_id: string | null
+          status: string
+          validated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id: string
+          reason?: string | null
+          reference?: string
+          responsible_id?: string | null
+          status?: string
+          validated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          reason?: string | null
+          reference?: string
+          responsible_id?: string | null
+          status?: string
+          validated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adjustments_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -565,6 +642,19 @@ export type Database = {
           reference_type: string | null
           related_location_id: string | null
           unit_cost_snapshot: number | null
+        }
+      }
+      validate_adjustment: {
+        Args: { p_adjustment_id: string; p_user_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          location_id: string
+          reason: string | null
+          reference: string
+          responsible_id: string | null
+          status: string
+          validated_at: string | null
         }
       }
       validate_delivery: {
