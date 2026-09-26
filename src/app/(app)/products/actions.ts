@@ -19,19 +19,45 @@ function parseProductForm(formData: FormData) {
 
 export async function createProduct(_prevState: ActionState, formData: FormData): Promise<ActionState> {
   const values = parseProductForm(formData);
+  const initialStock = Number(formData.get("initial_stock") ?? 0);
+  const initialLocationId = String(formData.get("initial_location_id") ?? "") || null;
 
   if (!values.sku || !values.name) {
     return { error: "SKU and name are required." };
   }
 
+  if (initialStock > 0 && !initialLocationId) {
+    return { error: "Choose a location to receive the initial stock." };
+  }
+
   const supabase = await createClient();
-  const { error } = await supabase.from("products").insert(values);
+  const { data: product, error } = await supabase.from("products").insert(values).select("id").single();
 
   if (error) {
     if (error.code === "23505") {
       return { error: `SKU "${values.sku}" is already in use.` };
     }
     return { error: error.message };
+  }
+
+  if (initialStock > 0 && initialLocationId) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { error: stockError } = await supabase.rpc("apply_stock_movement", {
+      p_product_id: product.id,
+      p_location_id: initialLocationId,
+      p_qty_delta: initialStock,
+      p_movement_type: "opening",
+      p_unit_cost: values.unit_cost,
+      p_reason: "Initial stock on product creation",
+      p_created_by: user?.id,
+    });
+
+    if (stockError) {
+      return { error: `Product created, but initial stock failed: ${stockError.message}` };
+    }
   }
 
   revalidatePath("/products");

@@ -135,6 +135,115 @@ export type Database = {
           },
         ]
       }
+      stock_balances: {
+        Row: {
+          location_id: string
+          on_hand: number
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          location_id: string
+          on_hand?: number
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          location_id?: string
+          on_hand?: number
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_balances_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_balances_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_ledger: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          location_id: string
+          movement_type: string
+          product_id: string
+          qty_after: number
+          qty_before: number
+          qty_delta: number
+          reason: string | null
+          reference_id: string | null
+          reference_type: string | null
+          related_location_id: string | null
+          unit_cost_snapshot: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location_id: string
+          movement_type: string
+          product_id: string
+          qty_after: number
+          qty_before: number
+          qty_delta: number
+          reason?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          related_location_id?: string | null
+          unit_cost_snapshot?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location_id?: string
+          movement_type?: string
+          product_id?: string
+          qty_after?: number
+          qty_before?: number
+          qty_delta?: number
+          reason?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          related_location_id?: string | null
+          unit_cost_snapshot?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_ledger_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_ledger_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_ledger_related_location_id_fkey"
+            columns: ["related_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       warehouses: {
         Row: {
           address: string | null
@@ -164,7 +273,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      apply_stock_movement: {
+        Args: {
+          p_created_by?: string
+          p_location_id: string
+          p_movement_type: string
+          p_product_id: string
+          p_qty_delta: number
+          p_reason?: string
+          p_reference_id?: string
+          p_reference_type?: string
+          p_related_location_id?: string
+          p_unit_cost?: number
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          id: string
+          location_id: string
+          movement_type: string
+          product_id: string
+          qty_after: number
+          qty_before: number
+          qty_delta: number
+          reason: string | null
+          reference_id: string | null
+          reference_type: string | null
+          related_location_id: string | null
+          unit_cost_snapshot: number | null
+        }
+      }
     }
     Enums: {
       [_ in never]: never

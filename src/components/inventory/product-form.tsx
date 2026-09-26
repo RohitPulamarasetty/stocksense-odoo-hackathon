@@ -8,6 +8,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import type { ActionState } from "@/app/(auth)/actions";
 
 type Category = { id: string; name: string };
+type Location = { id: string; name: string; warehouseName: string };
 
 type ProductDefaults = {
   sku?: string;
@@ -21,11 +22,13 @@ type ProductDefaults = {
 
 export function ProductForm({
   categories,
+  locations,
   defaults,
   action,
   submitLabel,
 }: {
   categories: Category[];
+  locations?: Location[];
   defaults?: ProductDefaults;
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
   submitLabel: string;
@@ -76,6 +79,29 @@ export function ProductForm({
           <Input id="reorder_qty" name="reorder_qty" type="number" min="0" step="0.001" defaultValue={defaults?.reorder_qty ?? 0} />
         </div>
       </div>
+
+      {locations && (
+        <div className="grid grid-cols-2 gap-4 rounded-lg border border-border p-4">
+          <div className="col-span-2 text-xs font-medium text-muted-foreground">
+            Initial stock (optional)
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="initial_stock">Quantity</Label>
+            <Input id="initial_stock" name="initial_stock" type="number" min="0" step="0.001" defaultValue={0} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="initial_location_id">Location</Label>
+            <Select id="initial_location_id" name="initial_location_id" defaultValue="">
+              <option value="">Select location…</option>
+              {locations.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.warehouseName} / {l.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+      )}
 
       {state?.error && <p className="text-sm text-status-canceled">{state.error}</p>}
       <SubmitButton>{submitLabel}</SubmitButton>

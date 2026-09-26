@@ -16,7 +16,7 @@ export default async function ProductsPage({
   const { q, category } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: categories }, productsQuery] = await Promise.all([
+  const [{ data: categories }, productsQuery, { data: balances }] = await Promise.all([
     supabase.from("categories").select("id, name").order("name"),
     (async () => {
       let query = supabase
@@ -33,9 +33,14 @@ export default async function ProductsPage({
 
       return query;
     })(),
+    supabase.from("stock_balances").select("product_id, on_hand"),
   ]);
 
   const products = productsQuery.data ?? [];
+  const stockByProduct = new Map<string, number>();
+  for (const b of balances ?? []) {
+    stockByProduct.set(b.product_id, (stockByProduct.get(b.product_id) ?? 0) + b.on_hand);
+  }
 
   return (
     <div className="space-y-6">
@@ -100,6 +105,7 @@ export default async function ProductsPage({
               <TableHead>Name</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>UoM</TableHead>
+              <TableHead className="text-right">Current Stock</TableHead>
               <TableHead className="text-right">Unit Cost</TableHead>
               <TableHead className="text-right">Reorder Level</TableHead>
               <TableHead>Status</TableHead>
@@ -120,6 +126,17 @@ export default async function ProductsPage({
                 </TableCell>
                 <TableCell className="text-muted-foreground">{product.categories?.name ?? "—"}</TableCell>
                 <TableCell className="text-muted-foreground">{product.uom}</TableCell>
+                <TableCell className="text-right">
+                  {(() => {
+                    const stock = stockByProduct.get(product.id) ?? 0;
+                    const health = stock <= 0 ? "out" : stock < product.reorder_level ? "low" : "healthy";
+                    return (
+                      <span className={health === "healthy" ? "" : health === "low" ? "text-health-low" : "text-health-out"}>
+                        {stock}
+                      </span>
+                    );
+                  })()}
+                </TableCell>
                 <TableCell className="text-right">₹{product.unit_cost.toFixed(2)}</TableCell>
                 <TableCell className="text-right">{product.reorder_level}</TableCell>
                 <TableCell>

@@ -17,3 +17,14 @@ export const stockHealthLabel: Record<StockHealth, string> = {
   out: "Out of Stock",
   dead: "Dead Stock",
 };
+
+export type MovementType = "opening" | "receipt" | "delivery" | "transfer_in" | "transfer_out" | "adjustment";
+
+export const movementTypeLabel: Record<MovementType, string> = {
+  opening: "Opening Stock",
+  receipt: "Receipt",
+  delivery: "Delivery",
+  transfer_in: "Transfer In",
+  transfer_out: "Transfer Out",
+  adjustment: "Adjustment",
+};
