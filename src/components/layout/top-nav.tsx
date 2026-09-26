@@ -60,13 +60,22 @@ export function TopNav() {
             />
           </div>
         </form>
-        <Link
-          href="/profile"
-          className="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-muted-foreground hover:text-foreground"
-          aria-label="Profile"
-        >
-          <User className="size-4" />
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/search"
+            className="flex size-8 items-center justify-center rounded-full bg-surface-muted text-muted-foreground hover:text-foreground sm:hidden"
+            aria-label="Search"
+          >
+            <Search className="size-4" />
+          </Link>
+          <Link
+            href="/profile"
+            className="flex size-8 items-center justify-center rounded-full bg-surface-muted text-muted-foreground hover:text-foreground"
+            aria-label="Profile"
+          >
+            <User className="size-4" />
+          </Link>
+        </div>
       </div>
     </header>
   );
