@@ -421,6 +421,93 @@ export type Database = {
           },
         ]
       }
+      transfer_lines: {
+        Row: {
+          id: string
+          product_id: string
+          qty: number
+          transfer_id: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          qty: number
+          transfer_id: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          qty?: number
+          transfer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_lines_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "transfers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfers: {
+        Row: {
+          created_at: string
+          destination_location_id: string
+          id: string
+          reference: string
+          responsible_id: string | null
+          scheduled_date: string
+          source_location_id: string
+          status: string
+          validated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          destination_location_id: string
+          id?: string
+          reference?: string
+          responsible_id?: string | null
+          scheduled_date?: string
+          source_location_id: string
+          status?: string
+          validated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          destination_location_id?: string
+          id?: string
+          reference?: string
+          responsible_id?: string | null
+          scheduled_date?: string
+          source_location_id?: string
+          status?: string
+          validated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfers_destination_location_id_fkey"
+            columns: ["destination_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfers_source_location_id_fkey"
+            columns: ["source_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       warehouses: {
         Row: {
           address: string | null
@@ -504,6 +591,20 @@ export type Database = {
           reference: string
           responsible_id: string | null
           scheduled_date: string
+          status: string
+          validated_at: string | null
+        }
+      }
+      validate_transfer: {
+        Args: { p_transfer_id: string; p_user_id: string }
+        Returns: {
+          created_at: string
+          destination_location_id: string
+          id: string
+          reference: string
+          responsible_id: string | null
+          scheduled_date: string
+          source_location_id: string
           status: string
           validated_at: string | null
         }
